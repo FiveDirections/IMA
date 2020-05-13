@@ -14,7 +14,7 @@ Integrity monitoring for Linux has typically been provided by external packages 
 
 Tripwire and AIDE monitor file integrity via an on-demand or scheduled basis. Thus, an intruder could modify a file without detection until the next on-demand or scheduled scan. IMA, however, when combined with the Linux audit subsystem enables the continuous integrity reporting of files accessed or executed along with the process that accessed or executed the file. Replacing Tripwire/AIDE would require local or back-end logic to determine when reported hashes have changed and is not covered in this document.
 
-This document will provide a brief overview of IMA and describe how to enable continuous reporting of the cryptographic hashes for files executed or memory mapped for execution. Collecting hashes from files accessed is also possible. However, the shear size of the telemetry from such monitoring may severly staturate network links.
+This document will provide a brief overview of IMA and describe how to enable continuous reporting of the cryptographic hashes for files executed or memory mapped for execution. Collecting hashes from files accessed is also possible. However, the sheer size of the telemetry from such monitoring may severly saturate network links.
 
 ## Integrity Measurement Architecture (IMA)
 IMA was originally intended to implement the capabilities described by the Trusted Computing Group (TCG) which is a consortium of companies from the computer industry. The TCG designed the Trusted Platform module (TPM). The TPM is a hardware chip, virtual TPM (vTPM) also exist, residing on the motherboard of a computer. <span id="a3">[[3]](#f3)</span>
@@ -68,7 +68,7 @@ This naming convention was used to mirror that of ```systemd``` v2.40 except tha
 IMA uses several files within the security file system located at ```/sys/kernel/security/ima```. The only file of importance to our effort is the ```policy``` file. Setting an IMA policy is by writing the policy to the ```policy``` file. Once written, the ```policy``` file disappears and the policy cannot be changed until the system is rebooted.
 
 ### Policies
-The IMA subsystem ships with a several builtin policies, but it is also capable of accepting custom policies. For this effort, we’re using a custom policy that is a subset of the default policy.
+The IMA subsystem ships with several builtin policies, but it is also capable of accepting custom policies. For this effort, we’re using a custom policy that is a subset of the default policy.
 
 #### One Builtin Policy
 One default IMA policy is named *ima_tcb*. The policy measures all files executed, all files memory mapped with the execute permission, and all files accessed by the root (uid=0) user.
@@ -141,7 +141,7 @@ NOTE: We have not added SHA256 support on CentOS/RHEL 8 to ensure a unified inst
 ## iVersion
 Measuring every file either opened or executed *every* time would be very expensive <span id="a1">[[1]](#f1)</span>. As a result, a number of file systems have added the ability to keep track of when a file changes in the meta-data of the file. iVersion is an example of one such meta-data element.
 
-Most UNIX based file systems use a data structure that holds meta-data for directories and files called an inode. One piece of meta-data in an inode in filesystems such as xfs, ext4, and btrfs is the *i_Version*. The *i_Version* field changes any time there is a change to any data or metadata associated with the inode <span id="a2">[[2]](#f2)</span>. IMA leverages *i_version* to avoid having to remeasure files that have already been measured. This does, introduce, the possibility that IMA maeasuring can be avoided by resetting the *i_version* field to its original value after a file modification. This would require the adversary to load a device driver to affect the changes. An adversary with the access level needed to load a device driver can already affect the security of the system greatly.
+Most UNIX based file systems use a data structure that holds meta-data for directories and files called an inode. One piece of meta-data in an inode in filesystems such as xfs, ext4, and btrfs is the *i_Version*. The *i_Version* field changes any time there is a change to any data or metadata associated with the inode <span id="a2">[[2]](#f2)</span>. IMA leverages *i_version* to avoid having to remeasure files that have already been measured. This does introduce the possibility that IMA maeasuring can be avoided by resetting the *i_version* field to its original value after a file modification. This would require the adversary to load a device driver to affect the changes. An adversary with the access level needed to load a device driver can already affect the security of the system greatly.
 
 *i_version* is enabled by default on CentOS/RHEL 8. It must be enabled in CentOS/RHEL 7.
 
