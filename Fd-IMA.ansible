@@ -1,0 +1,14 @@
+#
+# LICENSE: This code is provide to the United States Government with unlimited rights.
+#
+---
+- name: Transfer and execute a sript to install IMA.
+  hosts: linux
+  become: yes
+  become_user: root
+  tasks:
+     - name: Transfer the script
+       copy: src=Fd-IMA.sh dest=/tmp/Fd-IMA.sh mode=0744
+
+     - name: Execute the script
+       local_action: command sudo /bin/bash /tmp/Fd-IMA.sh
